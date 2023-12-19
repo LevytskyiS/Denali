@@ -15,6 +15,7 @@ from aiogram.methods import DeleteWebhook
 from config import config
 from app.keyboards import kb
 from memes.meme import get_random_meme
+from app.commands import START_MSG, DESC_MSG, HELP_MSG
 
 bot = Bot(config.API_KEY, parse_mode=ParseMode.HTML)
 dp = Dispatcher()
@@ -27,12 +28,17 @@ async def on_startup(_):
 
 @dp.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
-    await message.answer(f"Hello, {hbold(message.from_user.full_name)}!")
+    await message.answer(START_MSG)
 
 
 @dp.message(Command("help"))
 async def command_help_handler(message: Message) -> None:
-    await message.answer(text="Press one of the buttons below:", reply_markup=kb)
+    await message.answer(text=HELP_MSG, reply_markup=kb)
+
+
+@dp.message(Command("desc"))
+async def command_help_handler(message: Message) -> None:
+    await message.answer(text=DESC_MSG)
 
 
 @dp.message(Command("meme"))
