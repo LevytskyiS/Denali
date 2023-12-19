@@ -39,7 +39,10 @@ async def command_help_handler(message: Message) -> None:
 async def command_meme_handler(message: Message) -> None:
     meme = await get_random_meme()
     if meme.endswith(".gif"):
-        await bot.send_document(chat_id=message.chat.id, document=meme)
+        try:
+            await bot.send_document(chat_id=message.chat.id, document=meme)
+        except TelegramBadRequest as e:
+            await message.answer(text="Try one more time, the file is damaged.")
     else:
         await bot.send_photo(chat_id=message.chat.id, photo=meme)
 
