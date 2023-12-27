@@ -26,3 +26,26 @@ docker run --name denali-bot -d pycoder7/denali:0.0.1
 DEPLOY TO FLY: 
 fly launch
 fly scale count 1 - чтобы работал только на одной машине и не создавалось экземпляра одного и того же бота - это вызывает ошибки
+fly.toml - auto_stop_machines = false
+
++ Celery, Redis, Flower
+5. Для запуска celery, redis, flower в docker-compose.yml необходимо указывать подключение к redis следующим образом:
+"redis://localhost:6379"
+Причина: 
+
+When you run docker-compose, it creates a new network under which all your containers are running. Docker engine also creates an internal 
+routing which allows all the containers to reference each other using their names.
+
+In your case, your web and celery containers were trying to access redis over localhost. But inside the container, 
+localhost means their own localhost. You need to change the configuration to point the hostname to the name of the container.
+
+If you were not using docker, but had different machines for each of your container, localhost would have meant their own server. 
+In order to connect to redis server, you would have passed the IP address of the machine on which redis was running. 
+In docker, instead of IP address, you can just pass the name of the container because of the engine's routing discussed above.
+
+Note that you can still assign static IP addresses to each of your container, and use those IP addresses instead of container_names. For more details, 
+read the networking section of docker documents.
+
+5. pip install celery[redis] redis Flower
+6. celeryconfig.py, tasks.py
+7. docker-compose.yml 
