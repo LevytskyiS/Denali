@@ -4,12 +4,16 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, FSInputFile
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.methods import DeleteWebhook
+from aiogram.types.input_file import InputFile
+
+# from aiogram.utils.exceptions import WrongFileIdentifier, InvalidHTTPUrlContent
 
 from config import config
 from app.keyboards import kb
 from app.commands import START_MSG, DESC_MSG, HELP_MSG
 from memes.meme import get_random_meme
 from youtube.yt_downloader import get_youtube_video, remove_downloaded_video
+from instagram.inst import get_media
 
 bot = Bot(config.API_KEY, parse_mode=ParseMode.HTML)
 dp = Dispatcher()
@@ -61,6 +65,25 @@ async def download_yt_video(msg: types.Message):
         await remove_downloaded_video(video_path)
     else:
         await msg.answer(text="The file size is grater than 50 MB")
+
+
+@dp.message(lambda msg: "https://www.instagram.com" in msg.text)
+async def download_instagram_content(msg: Message):
+    photos = await get_media(msg.text)
+    if photos:
+        for photo in photos:
+            try:
+                await bot.send_document(chat_id=msg.from_user.id, document=str(photo))
+            # except WrongFileIdentifier as e:
+            #     await msg.answer(
+            #         f"This video is pretty big. Use this link below to download it:\n {photo}."
+            #     )
+            # except InvalidHTTPUrlContent as e:
+            #     await msg.answer(
+            #         "It seems that this link has some issues.\nTry again or get another link."
+            #     )
+            except Exception as e:
+                await msg.answer(str(e))
 
 
 async def main() -> None:
