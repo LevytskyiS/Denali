@@ -5,7 +5,7 @@ from pytube import YouTube
 
 
 async def get_youtube_video(url: str) -> str:
-    download_folder = "./youtube"
+    download_folder = "./video"
     yt = YouTube(url)
 
     (
