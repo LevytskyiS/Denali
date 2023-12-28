@@ -46,6 +46,6 @@ In docker, instead of IP address, you can just pass the name of the container be
 Note that you can still assign static IP addresses to each of your container, and use those IP addresses instead of container_names. For more details, 
 read the networking section of docker documents.
 
-5. pip install celery[redis] redis Flower
-6. celeryconfig.py, tasks.py
-7. docker-compose.yml 
+6. pip install celery[redis] redis Flower
+7. celeryconfig.py, tasks.py
+8. docker-compose.yml 
