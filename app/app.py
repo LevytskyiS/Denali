@@ -4,7 +4,7 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, FSInputFile
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.methods import DeleteWebhook
-from aiogram.types.input_file import InputFile
+from instagrapi.exceptions import PleaseWaitFewMinutes
 
 # from aiogram.utils.exceptions import WrongFileIdentifier, InvalidHTTPUrlContent
 
@@ -69,7 +69,11 @@ async def download_yt_video(msg: types.Message):
 
 @dp.message(lambda msg: "https://www.instagram.com" in msg.text)
 async def download_instagram_content(msg: Message):
-    photos = await get_media(msg.text)
+    try:
+        photos = await get_media(msg.text)
+    except PleaseWaitFewMinutes as e:
+        return await msg.answer(e.message)
+
     if photos:
         for photo in photos:
             try:

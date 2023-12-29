@@ -9,7 +9,16 @@ from instagrapi import Client
 from config.config import INSTAGRAM_LOGIN, INSTAGRAM_PASSWORD
 
 cl = Client()
+before_ip = cl._send_public_request("https://api.ipify.org/")
+# print("BEFORE: ", before_ip)
+# cl.set_proxy("http://mlilzgrv:5chlla8rfw2m@45.94.47.66:8110")
+# cl.set_proxy("https://188.92.14.26:1723")
+# after_ip = cl._send_public_request("https://api.ipify.org/")
+# print("AFTER: ", after_ip)
+cl.load_settings("./instagram/session.json")
 # cl.login(INSTAGRAM_LOGIN, INSTAGRAM_PASSWORD)
+# print(cl.get_timeline_feed())
+# cl.dump_settings("./instagram/session.json")
 
 
 async def get_data_from_carousel(resources: list) -> list:
