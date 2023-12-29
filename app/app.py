@@ -5,6 +5,7 @@ from aiogram.types import Message, FSInputFile
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.methods import DeleteWebhook
 from instagrapi.exceptions import PleaseWaitFewMinutes
+from pytube.exceptions import AgeRestrictedError
 
 # from aiogram.utils.exceptions import WrongFileIdentifier, InvalidHTTPUrlContent
 
@@ -53,7 +54,12 @@ async def command_meme_handler(message: Message) -> None:
 
 @dp.message(lambda msg: "youtube.com" in msg.text)
 async def download_yt_video(msg: types.Message):
-    video_path = await get_youtube_video(msg.text)
+    try:
+        video_path = await get_youtube_video(msg.text)
+    except AgeRestrictedError as e:
+        return await msg.answer(
+            text="Video is age restricted, and can't be accessed without logging in."
+        )
 
     if video_path:
         await bot.send_video(
