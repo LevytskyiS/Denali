@@ -153,3 +153,4 @@ cython_debug/
 
 # Project files
 config/config.ini
+steps.txt
