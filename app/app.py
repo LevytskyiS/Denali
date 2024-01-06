@@ -4,17 +4,14 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, FSInputFile
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.methods import DeleteWebhook
-from instagrapi.exceptions import PleaseWaitFewMinutes
 from pytube.exceptions import AgeRestrictedError
-
-# from aiogram.utils.exceptions import WrongFileIdentifier, InvalidHTTPUrlContent
 
 from config import config
 from app.keyboards import kb
 from app.commands import START_MSG, DESC_MSG, HELP_MSG
 from memes.meme import get_random_meme
 from youtube.yt_downloader import get_youtube_video, remove_downloaded_video
-from instagram.inst import get_media
+
 
 bot = Bot(config.API_KEY, parse_mode=ParseMode.HTML)
 dp = Dispatcher()
@@ -47,7 +44,9 @@ async def command_meme_handler(message: Message) -> None:
         try:
             await bot.send_document(chat_id=message.chat.id, document=meme)
         except TelegramBadRequest as e:
-            await message.answer(text="Try one more time, the file is damaged.")
+            await bot.send_message(
+                chat_id=message.chat.id, text="Try one more time, the file is damaged."
+            )
     else:
         await bot.send_photo(chat_id=message.chat.id, photo=meme)
 
@@ -58,7 +57,7 @@ async def download_yt_video(msg: types.Message):
         video_path = await get_youtube_video(msg.text)
     except AgeRestrictedError as e:
         return await msg.answer(
-            text="Video is age restricted, and can't be accessed without logging in."
+            text="Video is age restricted, and can't be accessed without logging in to Youtube."
         )
 
     if video_path:
@@ -71,29 +70,6 @@ async def download_yt_video(msg: types.Message):
         await remove_downloaded_video(video_path)
     else:
         await msg.answer(text="The file size is grater than 50 MB")
-
-
-@dp.message(lambda msg: "https://www.instagram.com" in msg.text)
-async def download_instagram_content(msg: Message):
-    try:
-        photos = await get_media(msg.text)
-    except PleaseWaitFewMinutes as e:
-        return await msg.answer(e.message)
-
-    if photos:
-        for photo in photos:
-            try:
-                await bot.send_document(chat_id=msg.from_user.id, document=str(photo))
-            # except WrongFileIdentifier as e:
-            #     await msg.answer(
-            #         f"This video is pretty big. Use this link below to download it:\n {photo}."
-            #     )
-            # except InvalidHTTPUrlContent as e:
-            #     await msg.answer(
-            #         "It seems that this link has some issues.\nTry again or get another link."
-            #     )
-            except Exception as e:
-                await msg.answer(str(e))
 
 
 async def main() -> None:
