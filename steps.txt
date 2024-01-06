@@ -9,8 +9,8 @@ CMD [ "python", "main.py" ]
 
 2. Create docker image and push it to DockerHub
 
-docker build . --platform=linux/amd64 -t pycoder7/denali:0.0.1
-docker push pycoder7/denali:0.0.1
+docker build . --platform=linux/amd64 -t pycoder7/denali:0.0.2
+docker push pycoder7/denali:0.0.2
 
 3. Login to server and pull the docker image
 
@@ -19,7 +19,7 @@ asdqwezxc - password
 
 if image is private, you need to login at dockerhub at server
 
-docker run --name denali-bot -d pycoder7/denali:0.0.1
+docker run --name denali-bot -d pycoder7/denali:0.0.2
 
 4. Stop and remove image if needed
 

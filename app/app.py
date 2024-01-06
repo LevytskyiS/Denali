@@ -1,21 +1,17 @@
-import asyncio
-import logging
-import sys
-
-from aiogram import Bot, Dispatcher, Router, types
+from aiogram import Bot, Dispatcher, types
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart, Command
-from aiogram.types import Message
-from aiogram.utils.markdown import hbold
-from aiogram.methods.send_animation import SendAnimation
-from aiogram.types.input_file import InputFile, URLInputFile
+from aiogram.types import Message, FSInputFile
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.methods import DeleteWebhook
+from pytube.exceptions import AgeRestrictedError
 
 from config import config
 from app.keyboards import kb
-from memes.meme import get_random_meme
 from app.commands import START_MSG, DESC_MSG, HELP_MSG
+from memes.meme import get_random_meme
+from youtube.yt_downloader import get_youtube_video, remove_downloaded_video
+
 from celery_config.tasks import test_func
 
 bot = Bot(config.API_KEY, parse_mode=ParseMode.HTML)
@@ -50,9 +46,32 @@ async def command_meme_handler(message: Message) -> None:
         try:
             await bot.send_document(chat_id=message.chat.id, document=meme)
         except TelegramBadRequest as e:
-            await message.answer(text="Try one more time, the file is damaged.")
+            await bot.send_message(
+                chat_id=message.chat.id, text="Try one more time, the file is damaged."
+            )
     else:
         await bot.send_photo(chat_id=message.chat.id, photo=meme)
+
+
+@dp.message(lambda msg: "youtube.com" in msg.text)
+async def download_yt_video(msg: types.Message):
+    try:
+        video_path = await get_youtube_video(msg.text)
+    except AgeRestrictedError as e:
+        return await msg.answer(
+            text="Video is age restricted, and can't be accessed without logging in to Youtube."
+        )
+
+    if video_path:
+        await bot.send_video(
+            chat_id=msg.from_user.id,
+            video=FSInputFile(video_path),
+            width=1280,
+            height=720,
+        )
+        await remove_downloaded_video(video_path)
+    else:
+        await msg.answer(text="The file size is grater than 50 MB")
 
 
 @dp.message(Command("celery"))
@@ -64,3 +83,4 @@ async def command_celery_handler(message: Message) -> None:
 async def main() -> None:
     await bot(DeleteWebhook(drop_pending_updates=True))
     await dp.start_polling(bot)
+    await bot.set_my_commands(["start"])
